@@ -7,7 +7,7 @@
 using namespace aryabhatta::math;
 using Catch::Approx;
 
-TEST_CASE("Transform defaults to identity", "[math][transform]") {
+TEST_CASE("Transform helper preserves identity", "[math][transform]") {
     const Transform transform{};
 
     REQUIRE(transform.translation.x == Approx(0.0f));
