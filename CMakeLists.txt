@@ -27,8 +27,7 @@ target_include_directories(aryabhatta_math
 
 target_link_libraries(aryabhatta_math
     INTERFACE
-        $<BUILD_INTERFACE:glm::glm>
-        $<INSTALL_INTERFACE:glm::glm>
+        glm::glm
 )
 
 if(ARYABHATTA_BUILD_TESTS)

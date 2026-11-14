@@ -16,11 +16,15 @@ if(NOT glm_FOUND)
         GIT_SHALLOW TRUE
     )
 
-    set(GLM_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-    set(GLM_BUILD_INSTALL OFF CACHE BOOL "" FORCE)
-    FetchContent_MakeAvailable(glm)
+    FetchContent_GetProperties(glm)
 
-    if(NOT TARGET glm::glm)
-        add_library(glm::glm ALIAS glm)
+    if(NOT glm_POPULATED)
+        FetchContent_Populate(glm)
     endif()
+
+    add_library(glm::glm INTERFACE IMPORTED GLOBAL)
+
+    set_target_properties(glm::glm PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "${glm_SOURCE_DIR}"
+    )
 endif()
