@@ -1,38 +1,50 @@
-# Math Conventions
+# Mathematical Conventions
 
-This document defines project-wide conventions. Consumers must not silently override them.
+This document defines the conventions used by the currently implemented
+mathematics API.
 
-## Scalar and units
+## Scalars and units
 
-- Runtime graphics and geometry defaults use `float`.
-- Angles are radians.
-- Distances are application-defined; use meters when a physical interpretation is required and document other units.
+- Runtime vector, matrix, and quaternion aliases use GLM's default scalar
+  type, `float`.
+- Angles are expressed in radians.
+- Distances and physical units are defined by the consuming application.
+  When a physical interpretation is required, document the unit at the API
+  boundary.
 
-## Coordinate system
+## Coordinate systems
 
-- Handedness: right-handed.
-- Up axis: +Y.
-- Initial world-space forward convention: +Z. Camera/view-space conventions are subsystem-specific and must be documented at API boundaries.
-- Basis: `cross(+X, +Y) = +Z`.
+- The initial 3D convention is right-handed.
+- The nominal up direction is positive Y.
+- The basis convention is `cross(+X, +Y) = +Z`.
+- Coordinate-system conversions must be explicit at module boundaries.
 
 ## Vectors and matrices
 
-- GLM column-major storage.
-- Column vectors; transform points with `M * v`.
-- Matrix access in GLM is `matrix[column][row]`.
-- Hierarchical transform composition: `parent * local`.
-- TRS conversion: `T * R * S` (scale first, then rotate, then translate when applied to a column vector).
+- Matrices use GLM's column-major storage.
+- Vectors are treated as column vectors.
+- Transform points using `M * v`.
+- GLM matrix elements are accessed as `matrix[column][row]`.
+- Hierarchical transforms compose as `parent * local`.
+- TRS conversion uses `T * R * S`; with column vectors, scale is applied
+  first, then rotation, then translation.
 
 ## Quaternions
 
-- GLM order: `(w, x, y, z)`; `w` is the scalar component.
-- Identity quaternion: `(1, 0, 0, 0)`.
-- Use normalized quaternions for rotations. Normalize values after algorithms that may accumulate drift.
+- Quaternion components follow GLM's `(w, x, y, z)` representation.
+- The identity quaternion is `(1, 0, 0, 0)`.
+- Quaternions used to represent rotations should be normalized.
+- Interpolation uses spherical linear interpolation.
 
-## Clip depth
+## Projection and clip-space depth
 
-The default public header defines `GLM_FORCE_DEPTH_ZERO_TO_ONE`, making GLM projection helpers Vulkan-friendly with a [0, 1] depth interval. OpenGL's conventional clip-depth interval is [-1, 1]; OpenGL clients must use a documented conversion or an explicit projection implementation. Do not treat the macro as a universal API-independent choice.
+The foundational math API does not impose a global graphics API clip-space
+depth convention. Projection matrices and depth-range choices belong in
+explicit projection or rendering-facing APIs.
 
 ## GLM configuration
 
-All GLM configuration macros must be defined before including any GLM header and must be identical across translation units. Consumers should include `<aryabhatta/math/math.hpp>` first and must not independently toggle handedness, depth, constructor initialization, or quaternion-related configuration.
+Include the public Aryabhatta header before GLM extension headers in a
+translation unit. Do not define conflicting GLM configuration macros in
+different translation units of the same program. GLM extension use is kept
+limited to the functionality required by the public API.

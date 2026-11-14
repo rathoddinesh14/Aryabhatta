@@ -1,42 +1,31 @@
 #pragma once
 
-// Aryabhatta - shared math foundation.
-// Include this header before using GLM anywhere in a consuming project.
-// These compile-time GLM conventions are part of the public ABI/configuration
-// contract and must be consistent across every translation unit.
-
-#ifndef GLM_FORCE_RADIANS
-#define GLM_FORCE_RADIANS
-#endif
-#ifndef GLM_FORCE_DEPTH_ZERO_TO_ONE
-#define GLM_FORCE_DEPTH_ZERO_TO_ONE
-#endif
-#ifndef GLM_FORCE_XYZW_ONLY
-#define GLM_FORCE_XYZW_ONLY
-#endif
-#ifndef GLM_ENABLE_EXPERIMENTAL
-#define GLM_ENABLE_EXPERIMENTAL
-#endif
-
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
-#include <glm/gtc/type_ptr.hpp>
+
+// GLM's quaternion interpolation extension is experimental in GLM 1.x.
+// This macro must be consistently enabled before including GLM extension headers.
+#ifndef GLM_ENABLE_EXPERIMENTAL
+#define GLM_ENABLE_EXPERIMENTAL
+#endif
 #include <glm/gtx/quaternion.hpp>
-#include <glm/gtx/transform.hpp>
 
 namespace aryabhatta::math {
 
 using Vec2 = glm::vec2;
 using Vec3 = glm::vec3;
 using Vec4 = glm::vec4;
+
 using Mat3 = glm::mat3;
 using Mat4 = glm::mat4;
+
 using Quat = glm::quat;
 
 inline const Vec3 UNIT_X{1.0f, 0.0f, 0.0f};
 inline const Vec3 UNIT_Y{0.0f, 1.0f, 0.0f};
 inline const Vec3 UNIT_Z{0.0f, 0.0f, 1.0f};
+
 inline const Quat IDENTITY_QUAT{1.0f, 0.0f, 0.0f, 0.0f};
 
 struct Transform {
@@ -45,13 +34,17 @@ struct Transform {
     Vec3 scale{1.0f};
 
     [[nodiscard]] Mat4 to_mat4() const {
-        const Mat4 t = glm::translate(Mat4{1.0f}, translation);
-        const Mat4 r = glm::mat4_cast(rotation);
-        const Mat4 s = glm::scale(Mat4{1.0f}, scale);
-        return t * r * s;
+        const Mat4 translation_matrix =
+            glm::translate(Mat4{1.0f}, translation);
+        const Mat4 rotation_matrix = glm::mat4_cast(rotation);
+        const Mat4 scale_matrix = glm::scale(Mat4{1.0f}, scale);
+
+        return translation_matrix * rotation_matrix * scale_matrix;
     }
 
-    [[nodiscard]] static Transform identity() { return {}; }
+    [[nodiscard]] static Transform identity() {
+        return {};
+    }
 };
 
 [[nodiscard]] inline Mat4 translate(const Vec3& value) {
@@ -78,12 +71,16 @@ struct Transform {
     return glm::slerp(a, b, t);
 }
 
-[[nodiscard]] inline Transform lerp(const Transform& a, const Transform& b, float t) {
-    return Transform{
-        .translation = lerp(a.translation, b.translation, t),
-        .rotation = slerp(a.rotation, b.rotation, t),
-        .scale = lerp(a.scale, b.scale, t),
-    };
+[[nodiscard]] inline Transform lerp(
+    const Transform& a,
+    const Transform& b,
+    float t
+) {
+    Transform result;
+    result.translation = lerp(a.translation, b.translation, t);
+    result.rotation = slerp(a.rotation, b.rotation, t);
+    result.scale = lerp(a.scale, b.scale, t);
+    return result;
 }
 
 } // namespace aryabhatta::math
