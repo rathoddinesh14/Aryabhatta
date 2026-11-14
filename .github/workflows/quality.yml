@@ -18,3 +18,5 @@ jobs:
       run_tidy: false
       run_build_and_test: true
       clang_version: "17"
+      cmake_args: |
+        -DARYABHATTA_BUILD_TESTS=ON
