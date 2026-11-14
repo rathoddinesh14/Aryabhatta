@@ -16,5 +16,5 @@ jobs:
       config_ref: v1.0.0
       run_format: true
       run_tidy: false
-      run_build_and_test: false
+      run_build_and_test: true
       clang_version: "17"
