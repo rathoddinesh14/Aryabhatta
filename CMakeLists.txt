@@ -57,6 +57,7 @@ if(ARYABHATTA_BUILD_TESTS)
         tests/math/test_math.cpp
         tests/math/test_glm_integration.cpp
         tests/math/test_math_helpers.cpp
+        tests/math/test_double_precision.cpp
     )
     target_link_libraries(aryabhatta_math_tests
         PRIVATE
@@ -67,9 +68,6 @@ if(ARYABHATTA_BUILD_TESTS)
     include(Catch)
     catch_discover_tests(aryabhatta_math_tests)
 endif()
-
-include(GNUInstallDirs)
-include(CMakePackageConfigHelpers)
 
 install(
     TARGETS aryabhatta_math

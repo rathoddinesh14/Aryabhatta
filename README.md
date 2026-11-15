@@ -30,6 +30,44 @@ The initial release provides:
 - Translation, scale, rotation, and angle-axis helpers.
 - Vector and transform linear interpolation.
 - Quaternion spherical linear interpolation.
+- Generic transform and helper implementations for float and double.
+
+## Precision support
+
+Aryabhatta provides two explicit precision families.
+
+| Float API | Double API |
+|---|---|
+| `Vec2` | `DVec2` |
+| `Vec3` | `DVec3` |
+| `Vec4` | `DVec4` |
+| `Mat3` | `DMat3` |
+| `Mat4` | `DMat4` |
+| `Quat` | `DQuat` |
+| `Transform` | `DTransform` |
+
+The float API remains the default and retains its existing names.
+
+The double API uses the corresponding GLM double-precision types.
+
+Example:
+
+```cpp
+#include <aryabhatta/math/math.hpp>
+
+using namespace aryabhatta::math;
+
+int main() {
+    Transform float_transform;
+    float_transform.translation = Vec3{1.0f, 2.0f, 3.0f};
+
+    DTransform double_transform;
+    double_transform.translation = DVec3{1.0, 2.0, 3.0};
+
+    const Mat4 float_matrix = float_transform.to_mat4();
+    const DMat4 double_matrix = double_transform.to_mat4();
+}
+```
 
 ## Planned modules
 
@@ -63,15 +101,89 @@ See [Mathematical Conventions](docs/MATH_CONVENTIONS.md) for details.
 
 ## Build
 
+### Requirements
+
+- CMake 3.20 or later
+- C++20 compatible compiler (GCC 10 or later recommended)
+- Git
+- GLM 1.0.1 (managed through the project's CMake dependency configuration)
+
+### Configure
+
 ```bash
-cmake -S . -B build -DARYABHATTA_BUILD_TESTS=ON
-cmake --build build --parallel
+cmake -S . -B build \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_C_COMPILER=gcc-10 \
+    -DCMAKE_CXX_COMPILER=g++-10 \
+    -DARYABHATTA_BUILD_TESTS=ON
+```
+
+### Build
+
+```bash
+cmake --build build --parallel 4
+```
+
+### Run Tests
+
+```bash
 ctest --test-dir build --output-on-failure
 ```
 
-GLM is discovered as a system CMake package when available. Otherwise CMake
-fetches the pinned version. Catch2 is fetched only when tests are enabled and
-a suitable package is unavailable.
+### Install
+
+```bash
+cmake --install build --prefix "$PWD/build/install"
+```
+
+### Package Consumer Validation
+
+Aryabhatta exports the `Aryabhatta::Math` CMake target. The following steps validate that an external CMake project can discover and consume the installed library.
+
+```bash
+cmake -S tests/package-consumer \
+    -B build/consumer \
+    -DCMAKE_PREFIX_PATH="$PWD/build/install" \
+    -DCMAKE_CXX_COMPILER=g++-10
+
+cmake --build build/consumer --parallel 4
+
+ctest --test-dir build/consumer --output-on-failure
+```
+
+### Clean Build
+
+To start from a clean build directory:
+
+```bash
+rm -rf build
+
+cmake -S . -B build \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_C_COMPILER=gcc-10 \
+    -DCMAKE_CXX_COMPILER=g++-10 \
+    -DARYABHATTA_BUILD_TESTS=ON
+
+cmake --build build --parallel 4
+
+ctest --test-dir build --output-on-failure
+```
+
+### Using Aryabhatta in Another CMake Project
+
+```cmake
+find_package(Aryabhatta CONFIG REQUIRED)
+
+add_executable(my_application main.cpp)
+
+target_link_libraries(
+    my_application
+    PRIVATE
+        Aryabhatta::Math
+)
+```
+
+The exported target propagates the required C++20 compile feature to consuming targets.
 
 ## Use from C++
 
