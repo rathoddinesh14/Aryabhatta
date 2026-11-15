@@ -20,3 +20,54 @@ jobs:
       clang_version: "17"
       cmake_args: |
         -DARYABHATTA_BUILD_TESTS=ON
+
+  package-consumer:
+    name: Installed package consumer
+    runs-on: ubuntu-latest
+    needs: quality
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            cmake \
+            ninja-build \
+            build-essential \
+            libglm-dev
+
+      - name: Configure Aryabhatta
+        run: |
+          cmake -S . -B build-package \
+            -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DARYABHATTA_BUILD_TESTS=OFF \
+            -DARYABHATTA_FETCH_GLM=OFF \
+            -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/build-package/install"
+
+      - name: Build Aryabhatta
+        run: |
+          cmake --build build-package --parallel
+
+      - name: Install Aryabhatta
+        run: |
+          cmake --install build-package
+
+      - name: Configure independent consumer
+        run: |
+          cmake -S tests/package-consumer \
+            -B build-package/consumer \
+            -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_PREFIX_PATH="$GITHUB_WORKSPACE/build-package/install"
+
+      - name: Build independent consumer
+        run: |
+          cmake --build build-package/consumer --parallel
+
+      - name: Run independent consumer
+        run: |
+          ./build-package/consumer/aryabhatta_consumer
