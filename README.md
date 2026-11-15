@@ -102,6 +102,32 @@ find_package(Aryabhatta CONFIG REQUIRED)
 target_link_libraries(your_target PRIVATE Aryabhatta::Math)
 ```
 
+## Dependency
+
+Aryabhatta uses [GLM](https://github.com/g-truc/glm) as its
+mathematics backend.
+
+GLM is a public dependency because Aryabhatta exposes GLM types
+through its public API.
+
+### Building Aryabhatta
+
+CMake first searches for an installed GLM package.
+
+If GLM is not found, Aryabhatta can fetch the pinned GLM version
+when `ARYABHATTA_FETCH_GLM` is enabled.
+
+### Using an installed Aryabhatta package
+
+Projects consuming an installed Aryabhatta package must also have
+GLM installed and discoverable by CMake.
+
+The GLM dependency is resolved through `find_dependency(glm CONFIG)`
+in the installed Aryabhatta package configuration.
+
+Fetching GLM while building Aryabhatta does not automatically install
+GLM for downstream projects.
+
 ## Documentation
 
 - [Architecture](docs/ARCHITECTURE.md)

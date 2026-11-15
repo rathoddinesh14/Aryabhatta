@@ -192,3 +192,38 @@ TEST_CASE("Quaternion slerp interpolates Z-axis rotations", "[math][interpolatio
         REQUIRE(glm::length(result) == Approx(1.0f).margin(0.0001f));
     }
 }
+
+TEST_CASE("Rotate normalizes non-unit axes", "[math][rotation]") {
+    const float angle = glm::radians(90.0f);
+
+    const Mat4 unit_axis_rotation = rotate(angle, Vec3{0.0f, 1.0f, 0.0f});
+
+    const Mat4 non_unit_axis_rotation = rotate(angle, Vec3{0.0f, 5.0f, 0.0f});
+
+    for (int column = 0; column < 4; ++column) {
+        for (int row = 0; row < 4; ++row) {
+            REQUIRE(non_unit_axis_rotation[column][row] ==
+                    Catch::Approx(unit_axis_rotation[column][row]).margin(1e-5f));
+        }
+    }
+}
+
+TEST_CASE("rotate rejects zero-length axes", "[math][rotation]") {
+    REQUIRE_THROWS_AS(rotate(glm::radians(90.0f), Vec3{0.0f, 0.0f, 0.0f}), std::invalid_argument);
+}
+
+TEST_CASE("angle_axis normalizes non-unit axes", "[math][rotation]") {
+    const float angle = glm::radians(90.0f);
+
+    const Quat unit_axis_rotation = angle_axis(angle, Vec3{0.0f, 1.0f, 0.0f});
+
+    const Quat non_unit_axis_rotation = angle_axis(angle, Vec3{0.0f, 5.0f, 0.0f});
+
+    REQUIRE(glm::abs(glm::dot(unit_axis_rotation, non_unit_axis_rotation)) ==
+            Catch::Approx(1.0f).margin(1e-5f));
+}
+
+TEST_CASE("angle_axis rejects zero-length axes", "[math][rotation]") {
+    REQUIRE_THROWS_AS(angle_axis(glm::radians(90.0f), Vec3{0.0f, 0.0f, 0.0f}),
+                      std::invalid_argument);
+}

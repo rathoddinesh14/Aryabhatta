@@ -26,3 +26,20 @@ Catch2 is a development dependency and is not linked to consumer targets.
 - Pin fetched dependencies to explicit versions or tags.
 - Do not expose test-only dependencies through public targets.
 - Review licenses and maintenance status before adding dependencies.
+
+## Downstream Dependency Requirement
+
+GLM is a public dependency of Aryabhatta.
+
+The installed package configuration calls:
+
+    find_dependency(glm CONFIG)
+
+Therefore, consumers using `find_package(Aryabhatta CONFIG REQUIRED)`
+must have GLM installed and available through their CMake package
+search paths.
+
+`ARYABHATTA_FETCH_GLM` only helps while configuring/building Aryabhatta.
+It does not bundle or install GLM as part of the Aryabhatta package.
+
+This is intentional: Aryabhatta does not vendor or duplicate GLM.

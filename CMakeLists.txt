@@ -17,6 +17,11 @@ include(cmake/Dependencies.cmake)
 add_library(aryabhatta_math INTERFACE)
 add_library(Aryabhatta::Math ALIAS aryabhatta_math)
 
+# Export the installed target as Aryabhatta::Math.
+set_target_properties(aryabhatta_math PROPERTIES
+    EXPORT_NAME Math
+)
+
 target_compile_features(aryabhatta_math INTERFACE cxx_std_20)
 
 target_include_directories(aryabhatta_math
@@ -63,14 +68,17 @@ if(ARYABHATTA_BUILD_TESTS)
     catch_discover_tests(aryabhatta_math_tests)
 endif()
 
-install(
-    DIRECTORY include/
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-)
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
 
 install(
     TARGETS aryabhatta_math
     EXPORT AryabhattaMathTargets
+)
+
+install(
+    DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/"
+    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
 )
 
 install(
@@ -81,9 +89,9 @@ install(
 )
 
 configure_package_config_file(
-    cmake/AryabhattaConfig.cmake.in
-    ${CMAKE_CURRENT_BINARY_DIR}/AryabhattaConfig.cmake
-    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Aryabhatta
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/AryabhattaConfig.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/AryabhattaConfig.cmake"
+    INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/Aryabhatta"
 )
 
 write_basic_package_version_file(
